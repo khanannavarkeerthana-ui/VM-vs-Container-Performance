@@ -28,22 +28,7 @@ This project compares the performance of Virtual Machines (VMs) and Docker Conta
 
 ---
 
-## 4. Project Structure
 
-    vm-vs-container-performance/
-    ├── README.md
-    ├── docs/
-    ├── docker/
-    ├── api/
-    ├── workloads/
-    ├── scripts/
-    ├── results/
-    │   ├── raw/
-    │   ├── processed/
-    │   └── figures/
-    └── screenshots/
-
----
 
 # Experiment 1 — CPU Performance
 

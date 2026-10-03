@@ -337,25 +337,8 @@ Measure performance as workload and concurrency increase.
 
 ---
 
-# Results
 
-Raw benchmark outputs are stored in:
-
-    results/raw/
-
-Processed results are stored in:
-
-    results/processed/
-
-Figures and graphs are stored in:
-
-    results/figures/
-
-Screenshots and experimental evidence are stored in:
-
-    screenshots/
-
----
+  
 
 # Conclusion
 

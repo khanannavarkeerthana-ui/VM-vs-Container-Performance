@@ -44,9 +44,7 @@ sysbench cpu \
  --threads=4 \
  --time=30 \
  run
-
-Save 10 runs:
-
+Save 10 Runs
 for i in {1..10}
 do
  sysbench cpu \
@@ -65,9 +63,7 @@ docker run --rm \
  --threads=4 \
  --time=30 \
  run
-
-Save 10 runs:
-
+Save 10 Runs
 for i in {1..10}
 do
  docker run --rm \
@@ -108,9 +104,7 @@ sysbench memory \
  --memory-total-size=10G \
  --threads=4 \
  run
-
-Repeat for 10 runs:
-
+Repeat for 10 Runs
 for i in {1..10}
 do
  sysbench memory \
@@ -331,3 +325,22 @@ Latency
 CPU utilization
 Memory utilization
 Performance under increasing workload
+Results
+
+Raw benchmark outputs are stored in:
+
+results/raw/
+
+Processed results are stored in:
+
+results/processed/
+
+Figures and graphs are stored in:
+
+results/figures/
+
+Screenshots and experimental evidence are stored in:
+
+screenshots/
+---
+

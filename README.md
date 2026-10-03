@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 
-This project compares the performance of **Virtual Machines (VMs)** and **Docker Containers** using CPU, memory, disk I/O, network, application, startup-time, and scalability benchmarks.
+This project compares the performance of Virtual Machines (VMs) and Docker Containers using CPU, memory, disk I/O, network, application, startup-time, and scalability benchmarks.
 
 ---
 
@@ -24,323 +24,364 @@ This project compares the performance of **Virtual Machines (VMs)** and **Docker
 
 ## 3. Project Directory
 
-```text
-~/vm-vs-container-performance
+    ~/vm-vs-container-performance
+
 ---
-Experiment 1 — CPU Performance
-Objective
+
+## 4. Project Structure
+
+    vm-vs-container-performance/
+    ├── README.md
+    ├── docs/
+    ├── docker/
+    ├── api/
+    ├── workloads/
+    ├── scripts/
+    ├── results/
+    │   ├── raw/
+    │   ├── processed/
+    │   └── figures/
+    └── screenshots/
+
+---
+
+# Experiment 1 — CPU Performance
+
+## Objective
 
 Compare CPU performance using a prime-number calculation workload.
 
-Tool
+## Tool
 
-sysbench
+`sysbench`
 
-VM
-mkdir -p ~/vm-vs-container-performance/results/raw/cpu/vm
+### VM
 
-sysbench cpu \
- --cpu-max-prime=20000 \
- --threads=4 \
- --time=30 \
- run
-Save 10 Runs
-for i in {1..10}
-do
- sysbench cpu \
- --cpu-max-prime=20000 \
- --threads=4 \
- --time=30 \
- run > ~/vm-vs-container-performance/results/raw/cpu/vm/run$i.txt
-done
-Docker
-mkdir -p ~/vm-vs-container-performance/results/raw/cpu/container
+    mkdir -p ~/vm-vs-container-performance/results/raw/cpu/vm
 
-docker run --rm \
- vm-container-benchmark \
- sysbench cpu \
- --cpu-max-prime=20000 \
- --threads=4 \
- --time=30 \
- run
-Save 10 Runs
-for i in {1..10}
-do
- docker run --rm \
- vm-container-benchmark \
- sysbench cpu \
- --cpu-max-prime=20000 \
- --threads=4 \
- --time=30 \
- run > ~/vm-vs-container-performance/results/raw/cpu/container/run$i.txt
-done
-CPU Scalability
-for threads in 1 2 4 8
-do
- sysbench cpu \
- --cpu-max-prime=20000 \
- --threads=$threads \
- --time=30 \
- run
-done
-Metrics
-Events/sec
-Execution time
-CPU scalability
-Experiment 2 — Memory Performance
-Objective
+    sysbench cpu --cpu-max-prime=20000 --threads=4 --time=30 run
+
+### Save 10 Runs
+
+    for i in {1..10}
+    do
+     sysbench cpu --cpu-max-prime=20000 --threads=4 --time=30 run > ~/vm-vs-container-performance/results/raw/cpu/vm/run$i.txt
+    done
+
+### Docker
+
+    mkdir -p ~/vm-vs-container-performance/results/raw/cpu/container
+
+    docker run --rm vm-container-benchmark sysbench cpu --cpu-max-prime=20000 --threads=4 --time=30 run
+
+### Save 10 Runs
+
+    for i in {1..10}
+    do
+     docker run --rm vm-container-benchmark sysbench cpu --cpu-max-prime=20000 --threads=4 --time=30 run > ~/vm-vs-container-performance/results/raw/cpu/container/run$i.txt
+    done
+
+### CPU Scalability
+
+    for threads in 1 2 4 8
+    do
+     sysbench cpu --cpu-max-prime=20000 --threads=$threads --time=30 run
+    done
+
+### Metrics
+
+- Events/sec
+- Execution time
+- CPU scalability
+
+---
+
+# Experiment 2 — Memory Performance
+
+## Objective
 
 Compare memory operation performance between VM and container.
 
-Tool
+## Tool
 
-sysbench
+`sysbench`
 
-VM
-mkdir -p ~/vm-vs-container-performance/results/raw/memory/vm
+### VM
 
-sysbench memory \
- --memory-block-size=1M \
- --memory-total-size=10G \
- --threads=4 \
- run
-Repeat for 10 Runs
-for i in {1..10}
-do
- sysbench memory \
- --memory-block-size=1M \
- --memory-total-size=10G \
- --threads=4 \
- run > ~/vm-vs-container-performance/results/raw/memory/vm/run$i.txt
-done
-Docker
-mkdir -p ~/vm-vs-container-performance/results/raw/memory/container
+    mkdir -p ~/vm-vs-container-performance/results/raw/memory/vm
 
-for i in {1..10}
-do
- docker run --rm \
- vm-container-benchmark \
- sysbench memory \
- --memory-block-size=1M \
- --memory-total-size=10G \
- --threads=4 \
- run > ~/vm-vs-container-performance/results/raw/memory/container/run$i.txt
-done
-Resource Monitoring
-vmstat 1
-docker stats
-Metrics
-Memory operations/sec
-Latency
-CPU usage
-Memory usage
-Experiment 3 — Disk I/O Performance
-Objective
+    sysbench memory --memory-block-size=1M --memory-total-size=10G --threads=4 run
+
+### Repeat for 10 Runs
+
+    for i in {1..10}
+    do
+     sysbench memory --memory-block-size=1M --memory-total-size=10G --threads=4 run > ~/vm-vs-container-performance/results/raw/memory/vm/run$i.txt
+    done
+
+### Docker
+
+    mkdir -p ~/vm-vs-container-performance/results/raw/memory/container
+
+    for i in {1..10}
+    do
+     docker run --rm vm-container-benchmark sysbench memory --memory-block-size=1M --memory-total-size=10G --threads=4 run > ~/vm-vs-container-performance/results/raw/memory/container/run$i.txt
+    done
+
+### Resource Monitoring
+
+    vmstat 1
+
+    docker stats
+
+### Metrics
+
+- Memory operations/sec
+- Latency
+- CPU usage
+- Memory usage
+
+---
+
+# Experiment 3 — Disk I/O Performance
+
+## Objective
 
 Compare sequential and random disk performance.
 
-Tool
+## Tool
 
-fio
+`fio`
 
-Sequential Write
-fio --name=seq-write \
- --filename=~/fio-test/testfile \
- --size=2G \
- --bs=1M \
- --rw=write \
- --direct=1 \
- --iodepth=16 \
- --runtime=30 \
- --time_based
-Sequential Read
-fio --name=seq-read \
- --filename=~/fio-test/testfile \
- --size=2G \
- --bs=1M \
- --rw=read \
- --direct=1 \
- --iodepth=16 \
- --runtime=30 \
- --time_based
-Random Read
-fio --name=random-read \
- --filename=~/fio-test/testfile \
- --size=2G \
- --bs=4k \
- --rw=randread \
- --direct=1 \
- --iodepth=16 \
- --runtime=30 \
- --time_based
-Random Write
-fio --name=random-write \
- --filename=~/fio-test/testfile \
- --size=2G \
- --bs=4k \
- --rw=randwrite \
- --direct=1 \
- --iodepth=16 \
- --runtime=30 \
- --time_based
-Docker
-docker run --rm \
- -v ~/fio-test:/fio-test \
- vm-container-benchmark \
- fio --name=seq-write \
- --filename=/fio-test/testfile \
- --size=2G \
- --bs=1M \
- --rw=write \
- --direct=1 \
- --iodepth=16 \
- --runtime=30 \
- --time_based
+### Sequential Write
 
-The same fio parameters were used for sequential read, random read, and random write workloads.
+    fio --name=seq-write --filename=~/fio-test/testfile --size=2G --bs=1M --rw=write --direct=1 --iodepth=16 --runtime=30 --time_based
 
-Metrics
-Throughput
-IOPS
-Latency
-Experiment 4 — Network Performance
-Objective
+### Sequential Read
+
+    fio --name=seq-read --filename=~/fio-test/testfile --size=2G --bs=1M --rw=read --direct=1 --iodepth=16 --runtime=30 --time_based
+
+### Random Read
+
+    fio --name=random-read --filename=~/fio-test/testfile --size=2G --bs=4k --rw=randread --direct=1 --iodepth=16 --runtime=30 --time_based
+
+### Random Write
+
+    fio --name=random-write --filename=~/fio-test/testfile --size=2G --bs=4k --rw=randwrite --direct=1 --iodepth=16 --runtime=30 --time_based
+
+### Docker
+
+    docker run --rm -v ~/fio-test:/fio-test vm-container-benchmark fio --name=seq-write --filename=/fio-test/testfile --size=2G --bs=1M --rw=write --direct=1 --iodepth=16 --runtime=30 --time_based
+
+The same `fio` parameters were used for sequential read, random read, and random write workloads.
+
+### Metrics
+
+- Throughput
+- IOPS
+- Latency
+
+---
+
+# Experiment 4 — Network Performance
+
+## Objective
 
 Measure network throughput and retransmissions.
 
-Tool
+## Tool
 
-iperf3
+`iperf3`
 
-Start Server
-iperf3 -s
-Find Server IP
-ip addr
-Client Test
-iperf3 -c <SERVER-IP> -t 30
-Parallel Streams
-iperf3 -c <SERVER-IP> -t 30 -P 4
-Save Result
-iperf3 -c <SERVER-IP> -t 30 \
-> results/raw/network/iperf3.txt
-Metrics
-Network throughput
-Retransmissions
-Parallel-stream performance
-Experiment 5 — FastAPI Application Performance
-Objective
+### Start Server
+
+    iperf3 -s
+
+### Find Server IP
+
+    ip addr
+
+### Client Test
+
+    iperf3 -c <SERVER-IP> -t 30
+
+### Parallel Streams
+
+    iperf3 -c <SERVER-IP> -t 30 -P 4
+
+### Save Result
+
+    iperf3 -c <SERVER-IP> -t 30 > results/raw/network/iperf3.txt
+
+### Metrics
+
+- Network throughput
+- Retransmissions
+- Parallel-stream performance
+
+---
+
+# Experiment 5 — FastAPI Application Performance
+
+## Objective
 
 Compare application performance inside the VM and Docker container.
 
-FastAPI Application
-from fastapi import FastAPI
+## FastAPI Application
 
-app = FastAPI()
+    from fastapi import FastAPI
 
-@app.get("/health")
-def health():
-    return {"status": "healthy"}
+    app = FastAPI()
 
-@app.get("/compute")
-def compute():
-    total = 0
-    for i in range(1_000_000):
-        total += i * i
-    return {"result": total}
+    @app.get("/health")
+    def health():
+        return {"status": "healthy"}
 
-@app.get("/memory")
-def memory():
-    data = [i for i in range(1_000_000)]
-    return {"elements": len(data)}
-Install Dependencies
-python3 -m pip install fastapi uvicorn
-Run Application
-uvicorn main:app --host 0.0.0.0 --port 8000
-Test Application
-curl http://localhost:8000/health
-Docker Build
-docker build -t performance-api -f api/Dockerfile api
-Docker Run
-docker run --rm -p 8000:8000 performance-api
-Health Endpoint Test
-curl http://127.0.0.1:8000/health
-Load Testing
-ab -n 10000 -c 100 \
-http://127.0.0.1:8000/health
-ab -n 1000 -c 10 \
-http://127.0.0.1:8000/compute
-Optional wrk Test
-sudo apt install -y wrk
-wrk -t4 -c100 -d30s \
-http://127.0.0.1:8000/health
-Metrics
-Requests/sec
-Response time
-Failed requests
-Connection time
-Experiment 6 — Startup Time
-Objective
+    @app.get("/compute")
+    def compute():
+        total = 0
+        for i in range(1_000_000):
+            total += i * i
+        return {"result": total}
+
+    @app.get("/memory")
+    def memory():
+        data = [i for i in range(1_000_000)]
+        return {"elements": len(data)}
+
+### Install Dependencies
+
+    python3 -m pip install fastapi uvicorn
+
+### Run Application
+
+    uvicorn main:app --host 0.0.0.0 --port 8000
+
+### Test Application
+
+    curl http://localhost:8000/health
+
+### Docker Build
+
+    docker build -t performance-api -f api/Dockerfile api
+
+### Docker Run
+
+    docker run --rm -p 8000:8000 performance-api
+
+### Health Endpoint Test
+
+    curl http://127.0.0.1:8000/health
+
+### Load Testing
+
+    ab -n 10000 -c 100 http://127.0.0.1:8000/health
+
+    ab -n 1000 -c 10 http://127.0.0.1:8000/compute
+
+### Optional wrk Test
+
+    sudo apt install -y wrk
+
+    wrk -t4 -c100 -d30s http://127.0.0.1:8000/health
+
+### Metrics
+
+- Requests/sec
+- Response time
+- Failed requests
+- Connection time
+
+---
+
+# Experiment 6 — Startup Time
+
+## Objective
 
 Measure application startup time in VM and Docker.
 
-Docker Startup
-time docker run --rm \
--d \
---name startup-test \
--p 8000:8000 \
-performance-api
-Check Application Readiness
-curl http://127.0.0.1:8000/health
-Stop Container
-docker stop startup-test
-Metrics
-Startup time
-Application-ready time
-Experiment 7 — Scalability
-Objective
+### Docker Startup
+
+    time docker run --rm -d --name startup-test -p 8000:8000 performance-api
+
+### Check Application Readiness
+
+    curl http://127.0.0.1:8000/health
+
+### Stop Container
+
+    docker stop startup-test
+
+### Metrics
+
+- Startup time
+- Application-ready time
+
+---
+
+# Experiment 7 — Scalability
+
+## Objective
 
 Measure performance as workload and concurrency increase.
 
-CPU Scalability
-for threads in 1 2 4 8
-do
- sysbench cpu \
- --cpu-max-prime=20000 \
- --threads=$threads \
- --time=30 \
- run
-done
-API Scalability
-wrk -t1 -c10 -d30s \
-http://127.0.0.1:8000/health
-wrk -t2 -c50 -d30s \
-http://127.0.0.1:8000/health
-wrk -t4 -c100 -d30s \
-http://127.0.0.1:8000/health
-wrk -t4 -c200 -d30s \
-http://127.0.0.1:8000/health
-Metrics
-Throughput
-Latency
-CPU utilization
-Memory utilization
-Performance under increasing workload
-Results
+### CPU Scalability
+
+    for threads in 1 2 4 8
+    do
+     sysbench cpu --cpu-max-prime=20000 --threads=$threads --time=30 run
+    done
+
+### API Scalability
+
+    wrk -t1 -c10 -d30s http://127.0.0.1:8000/health
+
+    wrk -t2 -c50 -d30s http://127.0.0.1:8000/health
+
+    wrk -t4 -c100 -d30s http://127.0.0.1:8000/health
+
+    wrk -t4 -c200 -d30s http://127.0.0.1:8000/health
+
+### Metrics
+
+- Throughput
+- Latency
+- CPU utilization
+- Memory utilization
+- Performance under increasing workload
+
+---
+
+# Results
 
 Raw benchmark outputs are stored in:
 
-results/raw/
+    results/raw/
 
 Processed results are stored in:
 
-results/processed/
+    results/processed/
 
 Figures and graphs are stored in:
 
-results/figures/
+    results/figures/
 
 Screenshots and experimental evidence are stored in:
 
-screenshots/
+    screenshots/
+
 ---
 
+# Conclusion
+
+This project compares Virtual Machines and Docker Containers across:
+
+- CPU performance
+- Memory performance
+- Disk I/O performance
+- Network performance
+- FastAPI application performance
+- Startup time
+- Scalability
+
+The experiments use consistent workloads and benchmark tools to collect performance measurements for both environments.
